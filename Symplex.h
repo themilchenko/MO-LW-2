@@ -37,12 +37,13 @@ public:
     int find_min() const;
 
     /*одна итерация преобразования*/
-    void do_step();
+    bool do_step();
 
     /*геттер оптимального решения*/
     double get_solution() const;
 
-    void do_examination() const;
+    void do_examination();
+    void do_dual_examination();
 
     void make_dual();
 
