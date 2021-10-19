@@ -157,6 +157,8 @@ int Symplex::find_column() const
             if (table_[table_.size() - 1][i] > 0)
                 return i;
     }
+
+    return -1;
 }
 
 int Symplex::find_str() const
@@ -191,9 +193,11 @@ int Symplex::find_min() const
     return min_index;
 }
 
-void Symplex::do_step()
+bool Symplex::do_step()
 {
     permissive_column_ = find_column();
+    if (permissive_column_ == -1)
+        return 0;
     permissive_str_ = find_str();
 
     /*swap переменных xi и xj*/
@@ -223,6 +227,7 @@ void Symplex::do_step()
         }
 
     table_ = copy_to;
+        return 1;
 }
 
 double Symplex::get_solution() const
@@ -230,7 +235,7 @@ double Symplex::get_solution() const
     return -table_[table_.size() - 1][0];
 }
 
-void Symplex::do_examination() const
+void Symplex::do_examination()
 {
     std::vector<std::pair<std::string, double>> solutions(basis_.size());
 
@@ -243,7 +248,7 @@ void Symplex::do_examination() const
                 solutions[j].second = table_[i][0];
 
     for (size_t j = 0; j < solutions.size(); ++j)
-        for (size_t i = 0; i < table_[0].size(); ++i)
+        for (size_t i = 0; i < table_[0].size() - 1; ++i)
             if (solutions[j].first == free_[i])
                 solutions[j].second = table_[table_.size() - 1][i + 1];
 
@@ -252,11 +257,40 @@ void Symplex::do_examination() const
 
     for (size_t i = 0; i < solutions.size(); ++i)
         if (i != solutions.size() - 1)
-            std::cout << std::to_string(goal_func[i])<< " * " << std::to_string(solutions[i].second) << " + ";
+            std::cout << goal_func[i] << " * " << solutions[i].second << " + ";
         else
-            std::cout << std::to_string(goal_func[i])<< " * " << std::to_string(solutions[i].second);
+            std::cout << goal_func[i] << " * " << solutions[i].second;
 
     std::cout << " = " << get_solution();
+}
+
+void Symplex::do_dual_examination()
+{
+    std::vector<std::pair<std::string, double>> solutions(basis_.size());
+
+    for (size_t i = 0; i < basis_.size(); ++i)
+        solutions[i].first = "y" + std::to_string(i + 1);
+
+    for (size_t j = 0; j < solutions.size(); ++j)
+        for (size_t i = 0; i < table_.size() - 1; ++i)
+            if (solutions[j].first == basis_[i])
+                solutions[j].second = table_[i][0];
+
+    for (size_t j = 0; j < solutions.size(); ++j)
+        for (size_t i = 0; i < table_[0].size() - 1; ++i)
+            if (solutions[j].first == free_[i])
+                solutions[j].second = table_[table_.size() - 1][i + 1];
+
+    for (const auto& i : solutions)
+        std::cout << i.first << " = " << i.second << std::endl;
+
+    for (size_t i = 0; i < solutions.size(); ++i)
+        if (i != solutions.size() - 1)
+            std::cout << goal_func[i] << " * " << solutions[i].second << " + ";
+        else
+            std::cout << goal_func[i] << " * " << solutions[i].second;
+
+    std::cout << " = " << -get_solution();
 }
 
 void Symplex::make_dual()
