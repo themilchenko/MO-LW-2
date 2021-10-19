@@ -6,7 +6,7 @@
 
 int main()
 {
-    std::string path = "/Users/ivanmilchenko/MO-lab-01/input.txt";
+    std::string path = "/Users/ivanmilchenko/MO_lab_02/nikinput.txt";
     std::ifstream input(path);
     if (!input)
         throw std::runtime_error("Unable to open file " + path);
@@ -37,17 +37,17 @@ int main()
     std::cout << "DUAL PROBLEM:\n";
     dual_problem.make_dual();
     dual_problem.print();
+    iterations = 0;
 
-    do
+    while(dual_problem.do_step())
     {
         ++iterations;
         std::cout << "THE " << iterations << " STEP:\n";
-        dual_problem.do_step();
         dual_problem.print();
-    } while (dual_problem.is_optimal());
+    }
 
     std::cout << "THE SOLUTION IS " << -dual_problem.get_solution() << std::endl;
-    dual_problem.do_examination();
+    dual_problem.do_dual_examination();
     std::cout << std::endl;
 
     return 0;
